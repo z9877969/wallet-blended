@@ -1,84 +1,126 @@
+import { Component, useState } from "react";
+import { Route } from "react-router";
+import { connect } from "react-redux";
 import moment from "moment";
+
 import Button from "../_share/Button/Button";
 import LableInput from "../_share/LableInput/LableInput";
 import Section from "../_share/Section/Section";
 import getTransOpts from "../../assets/options/transactionsOpts";
-import { Component } from "react";
 import CategoriesList from "../CategoriesList/CategoriesList";
-import { Route } from "react-router";
 
-class TransactionPage extends Component {
-  state = {
+import {
+  addIncomes,
+  addCosts,
+  changeDataForm,
+  resetDataForm,
+} from "../../redux/transactions/transactionsActions";
+
+function TransactionPage(props) {
+  const {
+    history,
+    location,
+    match,
+    changeDataForm,
+    addIncomesProps,
+    addCostsProps,
+    resetDataForm,
+    dataForm,
+  } = props;
+  const { params, path } = match;
+  const title = params.transType === "incomes" ? "Доходы" : "Расходы";
+
+  const [isCategoryList, setIsCategoryList] = useState(false);
+  const [transaction, setTransaction] = useState({
     date: moment().format("YYYY-MM-DD"),
     time: moment().format("HH:mm"),
     category: "Еда",
     sum: "",
     currency: "RUB",
     comment: "",
-    isCategoryList: false,
-  };
+  });
 
-  handleChange = (e) => {
+  const handleChange = (e) => {
     const { value, name } = e.target;
-    this.setState({ [name]: value });
+    setTransaction((prev) => ({ ...prev, [name]: value }));
   };
 
-  handleClick = () => {
-    const { history, match } = this.props;
+  const handleClick = () => {
     history.push(`${match.url}/categories`);
-    this.handleToggleCatList();
+    handleToggleCatList();
   };
 
-  handleToggleCatList = () => {
-    this.setState((prev) => ({ isCategoryList: !prev.isCategoryList }));
+  const handleToggleCatList = () => {
+    setIsCategoryList((prev) => !prev);
   };
 
-  handleGoBack = () => {
-    this.props.history.push("/");
+  const handleGoBack = () => {
+    history.push(location.state?.from || "/");
   };
 
-  render() {
-    const {
-      match: { params, path },
-    } = this.props;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    params.transType === "incomes" && addIncomesProps(dataForm);
+    params.transType === "costs" && addCostsProps(dataForm);
+    resetDataForm();
+    handleGoBack();
+  };
 
-    const title = params.transType === "incomes" ? "Доходы" : "Расходы";
-    return (
-      <>
-        {!this.state.isCategoryList && (
-          <Section>
-            <form>
-              <Button title="GoBack" cbOnClick={this.handleGoBack} />
-              <h2>{title}</h2>
-              <Button title="Ok" type="submit" />
-              <ul>
-                {getTransOpts({
-                  cbOnChange: this.handleChange,
-                  cbOnClick: this.handleClick,
-                  values: this.state,
-                }).map((option) => (
-                  <li key={option.name}>
-                    <LableInput {...option} />
-                  </li>
-                ))}
-              </ul>
-            </form>
-          </Section>
+  return (
+    <>
+      {!isCategoryList && (
+        <Section>
+          <form onSubmit={handleSubmit}>
+            <Button title="GoBack" cbOnClick={handleGoBack} />
+            <h2>{title}</h2>
+            <Button title="Ok" type="submit" />
+            <ul>
+              {getTransOpts({
+                cbOnChange: handleChange,
+                cbOnClick: handleClick,
+                values: transaction,
+              }).map((option) => (
+                <li key={option.name}>
+                  <LableInput {...option} />
+                </li>
+              ))}
+            </ul>
+          </form>
+        </Section>
+      )}
+      <Route
+        path={`${path}/categories`}
+        render={(props) => (
+          <CategoriesList
+            {...props}
+            transType={params.transType}
+            handleChange={handleChange}
+            onToggle={handleToggleCatList}
+          />
         )}
-        <Route
-          path={`${path}/categories`}
-          render={(props) => (
-            <CategoriesList
-              {...props}
-              transType={params.transType}
-              handleChange={this.handleChange}
-              onToggle={this.handleToggleCatList}
-            />
-          )}
-        />
-      </>
-    );
-  }
+      />
+    </>
+  );
 }
 
-export default TransactionPage;
+const mapStateToProps = (state) => ({
+  dataForm: state.transactions.dataForm,
+});
+const mapDispatchToProps = {
+  addIncomesProps: addIncomes,
+  addCostsProps: addCosts,
+  changeDataForm,
+  resetDataForm,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TransactionPage);
+
+// const con = (mSTP, mDTP) => {
+//   const store = mSTP(state);
+
+//   return (WrapedComponent) => {
+//     return <WrapedComponent {...store} {...mDTP} />;
+//   };
+// };
+
+// con(mSTP, mDTP)(COMPONENT)

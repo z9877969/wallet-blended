@@ -10,10 +10,12 @@ const balanceOpts = [
   },
 ];
 
-const MainPage = ({ history }) => {
+const MainPage = ({ history, location }) => {
   const handleOpenTransaction = (transType) => {
     const pathname = "/" + transType;
-    history.push(pathname);
+    history.push({pathname: pathname, state: {
+      from: location
+    }});
   };
   return (
     <>
