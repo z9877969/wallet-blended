@@ -11,6 +11,8 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import transactions from "./transactions/transactionsReducer";
+import {authReducer} from './auth/authReducer';
+import error from './error/errorReducer';
 
 const persistConfigTransactions = {
   key: "root",
@@ -18,12 +20,17 @@ const persistConfigTransactions = {
   blacklist: ["dataForm"],
 };
 
+const persistConfigAuth = {
+  key: "token",
+  storage,
+  whitelist: ["idToken"],
+};
+
 const store = configureStore({
   reducer: {
-    transactions: persistReducer(
-      persistConfigTransactions,
-      transactions
-    ),
+    auth: persistReducer(persistConfigAuth, authReducer),
+    transactions,
+    error,
   },
   middleware: getDefaultMiddleware({
     serializableCheck: {

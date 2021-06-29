@@ -23,12 +23,13 @@ function TransactionPage(props) {
   const { history, location, match, resetDataForm, dataForm } = props;
   const dispatch = useDispatch();
   const { params, path } = match;
-  const title = params.transType === "incomes" ? "Доходы" : "Расходы";
-  const category = params.transType === "incomes" ? "Зарплата" : "Еда";
+  const url = match.url.slice(1);
+  const title = url === "incomes" ? "Доходы" : "Расходы";
+  const category = url === "incomes" ? "Зарплата" : "Еда";
   const transId = Number(params.transId);
 
   const data =
-    useSelector((state) => state.transactions)[params.transType] || [];
+    useSelector((state) => state.transactions)[url] || [];
   const editedId = useSelector((state) => state.transactions.editedId);
   const editTransaction = data.find(
     (transaction) => transaction.id === transId
@@ -68,12 +69,12 @@ function TransactionPage(props) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (editedId) {
-      params.transType === "incomes" && dispatch(editIncomes(transaction));
-      params.transType === "costs" && dispatch(editCosts(transaction));
+      url === "incomes" && dispatch(editIncomes(transaction));
+      url === "costs" && dispatch(editCosts(transaction));
       dispatch(removeTransactionId());
     } else {
-      params.transType === "incomes" && dispatch(addIncomes(transaction));
-      params.transType === "costs" && dispatch(addCosts(transaction));
+      url === "incomes" && dispatch(addIncomes(transaction));
+      url === "costs" && dispatch(addCosts(transaction));
     }
     handleGoBack();
   };
@@ -109,7 +110,7 @@ function TransactionPage(props) {
         render={(props) => (
           <CategoriesList
             {...props}
-            transType={params.transType}
+            transType={url}
             handleChange={handleChange}
             onToggle={handleToggleCatList}
           />
