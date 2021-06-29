@@ -13,9 +13,28 @@ const balanceOpts = [
 const MainPage = ({ history, location }) => {
   const handleOpenTransaction = (transType) => {
     const pathname = "/" + transType;
-    history.push({pathname: pathname, state: {
-      from: location
-    }});
+    history.push({
+      pathname: pathname,
+      state: {
+        from: location,
+      },
+    });
+  };
+  const handleOpenCostsList = () => {
+    history.push({
+      pathname: "/costs/list",
+      state: {
+        from: location,
+      },
+    });
+  };
+  const handleOpenIncomesList = () => {
+    history.push({
+      pathname: "/incomes/list",
+      state: {
+        from: location,
+      },
+    });
   };
   return (
     <>
@@ -36,8 +55,8 @@ const MainPage = ({ history, location }) => {
       />
       <MainInfo options={balanceOpts} title={"Баланс"} btnTitle="..." />
       <Section>
-        <Button title="Все расходы" />
-        <Button title="Все доходы" />
+        <Button title="Все расходы" cbOnClick={handleOpenCostsList} />
+        <Button title="Все доходы" cbOnClick={handleOpenIncomesList} />
       </Section>
     </>
   );

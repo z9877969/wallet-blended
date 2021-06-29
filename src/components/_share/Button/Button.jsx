@@ -1,6 +1,9 @@
-const Button = ({ type = "button", title, cbOnClick }) => {
+const Button = ({ type = "button", title, cbOnClick, cbArgs }) => {
   return cbOnClick ? (
-    <button type={type} onClick={cbOnClick}>
+    <button
+      type={type}
+      onClick={cbArgs ? () => cbOnClick(...cbArgs) : cbOnClick}
+    >
       {title}
     </button>
   ) : (

@@ -1,6 +1,18 @@
 import { combineReducers, createReducer } from "@reduxjs/toolkit";
 import moment from "moment";
-import { addCosts, changeDataForm, resetDataForm } from "./transactionsActions";
+import {
+  addCosts,
+  addCostsSuccess,
+  addIncomesSuccess,
+  addTransactionId,
+  changeDataForm,
+  editCostsSuccess,
+  editIncomesSuccess,
+  getCostsSuccess,
+  getIncomesSuccess,
+  removeTransactionId,
+  resetDataForm,
+} from "./transactionsActions";
 
 const initialState = {
   incomes: [],
@@ -15,17 +27,20 @@ const initialState = {
   },
 };
 
-const incomesReduser = (state = initialState.incomes, { type, payload }) => {
-  switch (type) {
-    case "transactions/addIncomes":
-      return [...state, payload];
-    default:
-      return state;
-  }
-};
+const incomesReduser = createReducer([], {
+  [getIncomesSuccess]: (_, { payload }) => [...payload],
+  [addIncomesSuccess]: (state, { payload }) => [...state, payload],
+  [editIncomesSuccess]: (state, { payload }) => {
+    return state.map((trans) => (trans.id !== payload.id ? trans : payload));
+  },
+});
 
 const costsReducer = createReducer([], {
-  [addCosts]: (state, action) => [...state, action.payload],
+  [getCostsSuccess]: (_, { payload }) => [...payload],
+  [addCostsSuccess]: (state, action) => [...state, action.payload],
+  [editCostsSuccess]: (state, { payload }) => {
+    return state.map((trans) => (trans.id !== payload.id ? trans : payload));
+  },
 });
 
 const dataForm = createReducer(initialState.dataForm, {
@@ -36,9 +51,15 @@ const dataForm = createReducer(initialState.dataForm, {
   [resetDataForm]: () => initialState.dataForm,
 });
 
+const editedId = createReducer("", {
+  [addTransactionId]: (_, { payload }) => payload,
+  [removeTransactionId]: () => "",
+});
+
 const transactionsReducer = combineReducers({
   costs: costsReducer,
   incomes: incomesReduser,
+  editedId,
   dataForm,
 });
 

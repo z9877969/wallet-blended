@@ -1,4 +1,4 @@
-import css from './IconAdd.module.css';
+// import css from './IconAdd.module.css';
 
 const IconAdd = ({className}) => {
   return (

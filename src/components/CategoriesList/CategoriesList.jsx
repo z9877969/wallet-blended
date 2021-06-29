@@ -6,13 +6,13 @@ const сatOptsList = {
   incomes: [
     {
       name: "category",
-      value: "salary",
+      value: "Зарплата",
       title: "Зарплата",
       type: "radio",
     },
     {
       name: "category",
-      value: "bonus",
+      value: "Бонус",
       title: "Бонус",
       type: "radio",
     },
@@ -20,13 +20,13 @@ const сatOptsList = {
   costs: [
     {
       name: "category",
-      value: "food",
+      value: "Еда",
       title: "Еда",
       type: "radio",
     },
     {
       name: "category",
-      value: "car",
+      value: "Машина",
       title: "Машина",
       type: "radio",
     },
@@ -39,11 +39,11 @@ const CategoriesList = ({ transType, handleChange, history, onToggle }) => {
     history.push("/" + transType);
   };
 
-    const handleCategoryChange = (e) => {
-        handleChange(e);
-        onToggle();
-        handleGoBack();
-    }
+  const handleCategoryChange = (e) => {
+    handleChange(e);
+    onToggle();
+    handleGoBack();
+  };
 
   return (
     <Section>

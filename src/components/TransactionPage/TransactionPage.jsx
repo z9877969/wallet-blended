@@ -1,6 +1,6 @@
-import { Component, useState } from "react";
+import { Component, useState, useEffect } from "react";
 import { Route } from "react-router";
-import { connect } from "react-redux";
+import { connect, useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 
 import Button from "../_share/Button/Button";
@@ -8,37 +8,44 @@ import LableInput from "../_share/LableInput/LableInput";
 import Section from "../_share/Section/Section";
 import getTransOpts from "../../assets/options/transactionsOpts";
 import CategoriesList from "../CategoriesList/CategoriesList";
-
 import {
   addIncomes,
   addCosts,
-  changeDataForm,
-  resetDataForm,
+  editCosts,
+  editIncomes,
+} from "../../redux/transactions/transactionsOperations";
+import {
+  addTransactionId,
+  removeTransactionId,
 } from "../../redux/transactions/transactionsActions";
 
 function TransactionPage(props) {
-  const {
-    history,
-    location,
-    match,
-    changeDataForm,
-    addIncomesProps,
-    addCostsProps,
-    resetDataForm,
-    dataForm,
-  } = props;
+  const { history, location, match, resetDataForm, dataForm } = props;
+  const dispatch = useDispatch();
   const { params, path } = match;
   const title = params.transType === "incomes" ? "Доходы" : "Расходы";
+  const category = params.transType === "incomes" ? "Зарплата" : "Еда";
+  const transId = Number(params.transId);
 
-  const [isCategoryList, setIsCategoryList] = useState(false);
-  const [transaction, setTransaction] = useState({
+  const data =
+    useSelector((state) => state.transactions)[params.transType] || [];
+  const editedId = useSelector((state) => state.transactions.editedId);
+  const editTransaction = data.find(
+    (transaction) => transaction.id === transId
+  );
+  const inititalTransaction = {
     date: moment().format("YYYY-MM-DD"),
     time: moment().format("HH:mm"),
-    category: "Еда",
+    category,
     sum: "",
     currency: "RUB",
     comment: "",
-  });
+  };
+
+  const [isCategoryList, setIsCategoryList] = useState(false);
+  const [transaction, setTransaction] = useState(() =>
+    params.transId ? editTransaction : inititalTransaction
+  );
 
   const handleChange = (e) => {
     const { value, name } = e.target;
@@ -60,11 +67,20 @@ function TransactionPage(props) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    params.transType === "incomes" && addIncomesProps(dataForm);
-    params.transType === "costs" && addCostsProps(dataForm);
-    resetDataForm();
+    if (editedId) {
+      params.transType === "incomes" && dispatch(editIncomes(transaction));
+      params.transType === "costs" && dispatch(editCosts(transaction));
+      dispatch(removeTransactionId());
+    } else {
+      params.transType === "incomes" && dispatch(addIncomes(transaction));
+      params.transType === "costs" && dispatch(addCosts(transaction));
+    }
     handleGoBack();
   };
+
+  useEffect(() => {
+    transId && dispatch(addTransactionId(transId));
+  }, [transId]);
 
   return (
     <>
@@ -103,24 +119,4 @@ function TransactionPage(props) {
   );
 }
 
-const mapStateToProps = (state) => ({
-  dataForm: state.transactions.dataForm,
-});
-const mapDispatchToProps = {
-  addIncomesProps: addIncomes,
-  addCostsProps: addCosts,
-  changeDataForm,
-  resetDataForm,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(TransactionPage);
-
-// const con = (mSTP, mDTP) => {
-//   const store = mSTP(state);
-
-//   return (WrapedComponent) => {
-//     return <WrapedComponent {...store} {...mDTP} />;
-//   };
-// };
-
-// con(mSTP, mDTP)(COMPONENT)
+export default TransactionPage;
